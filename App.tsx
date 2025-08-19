@@ -187,7 +187,7 @@ const App: React.FC = () => {
                 >
                     <PlusIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                     <span className="hidden md:inline">구절 추가</span>
-                    <span className="md:hidden text-xs font-semibold">구절+</span>
+                    <span className="md:hidden text-xs font-semibold">구절</span>
                 </button>
                 {activeVerses.length > 0 && (
                    <button

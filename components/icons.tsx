@@ -109,7 +109,7 @@ export const CircleIcon: React.FC<IconProps> = ({ className }) => (
 );
 
 export const SettingsIcon: React.FC<IconProps> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-  );
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226.55-.22 1.156-.22 1.706 0 .55.22 1.02.684 1.11 1.226l.043.25a1.75 1.75 0 0 0 1.75 1.75h.253c.542 0 1.007.56 1.226 1.11.22.55.22 1.156 0 1.706-.22.55-.684 1.02-1.226 1.11l-.25.043a1.75 1.75 0 0 0-1.75 1.75v.253c0 .542-.56 1.007-1.11 1.226-.55.22-1.156.22-1.706 0-.55-.22-1.02-.684-1.11-1.226l-.043-.25a1.75 1.75 0 0 0-1.75-1.75h-.253c-.542 0-1.007-.56-1.226-1.11-.22-.55-.22-1.156 0-1.706.22-.55.684-1.02 1.226-1.11l.25-.043a1.75 1.75 0 0 0 1.75-1.75v-.253c0-.542.56-1.007 1.11-1.226ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" />
+  </svg>
+);

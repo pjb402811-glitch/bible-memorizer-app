@@ -108,7 +108,7 @@ const VerseList: React.FC<VerseListProps> = ({ verses, onUpdateStatus, onDelete,
         </h3>
         <p className="text-slate-500 mt-2">
           {listType === 'inProgress'
-            ? '"구절 추가" 버튼을 클릭하여 암송 여정을 시작하세요!'
+            ? '"+구절"버튼을 클릭하여 암송 여정을 시작하세요!'
             : '구절을 암송 완료하면 이곳으로 이동합니다.'}
         </p>
       </div>

@@ -13,12 +13,10 @@ const ApiKeyContext = createContext<ApiKeyContextType | undefined>(undefined);
 export const ApiKeyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [apiKey, setApiKey] = useLocalStorage<string>('google-api-key', '');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  
+  const value = { apiKey, setApiKey, isApiKeyModalOpen, setIsApiKeyModalOpen };
 
-  return React.createElement(
-    ApiKeyContext.Provider,
-    { value: { apiKey, setApiKey, isApiKeyModalOpen, setIsApiKeyModalOpen } },
-    children
-  );
+  return React.createElement(ApiKeyContext.Provider, { value }, children);
 };
 
 export const useApiKey = (): ApiKeyContextType => {

@@ -14,7 +14,7 @@ const statusConfig = {
 }
 
 // Explicitly define the order for a left-to-right progression display.
-const statusOrder: MemorizationStatus[] = [MemorizationStatus.NotStarted, MemorizationStatus.InProgress, MemorizationStatus.Mastered];
+const statusOrder: MemorizationStatus[] = [MemorizationStatus.Mastered, MemorizationStatus.InProgress, MemorizationStatus.NotStarted];
 
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ verses, dueCount }) => {
@@ -46,7 +46,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ verses, dueCount }) =
       </div>
       <div>
         <div>
-            <div className="flex w-full h-4 sm:h-5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="flex w-full h-6 sm:h-7 bg-slate-200 rounded-full overflow-hidden">
                 {statusOrder.map(status => {
                     const percentage = total > 0 ? (stats[status] / total) * 100 : 0;
                     if(percentage === 0) return null;
@@ -60,7 +60,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ verses, dueCount }) =
                     )
                 })}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 mt-4 text-sm font-medium text-slate-600">
+            <div className="flex justify-between items-center mt-4 text-sm font-medium text-slate-600">
                 {statusOrder.map(status => (
                     <div key={status} className="flex items-center">
                         <span className={`h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full mr-2 ${statusConfig[status].color}`}></span>
