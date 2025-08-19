@@ -1,0 +1,5 @@
+{
+  "name": "성경 암송 도우미",
+  "description": "진도 추적과 플래시카드 기능을 통해 성경 구절 암송을 돕는 앱입니다. AI가 자동으로 구절 텍스트를 가져옵니다.",
+  "requestFramePermissions": []
+}
