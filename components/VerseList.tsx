@@ -52,6 +52,7 @@ const VerseListItem: React.FC<VerseListItemProps> = ({ verse, onUpdateStatus, on
             >
                 <BrainIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">연습</span>
+                <span className="sm:hidden text-xs">문제</span>
             </button>
          )}
         <div className="relative">
@@ -59,8 +60,8 @@ const VerseListItem: React.FC<VerseListItemProps> = ({ verse, onUpdateStatus, on
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={`flex items-center px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-full ${config.buttonClasses} ring-1 ring-inset ${config.ring} focus:outline-none`}
           >
-            {verse.status}
-            <ChevronDownIcon className={`h-4 w-4 ml-1 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+            {verse.status === MemorizationStatus.NotStarted ? '시작전' : verse.status}
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''} ${verse.status === MemorizationStatus.NotStarted ? 'ml-0.5' : 'ml-1'}`} />
           </button>
           {isMenuOpen && (
             <div className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black/5 z-10">

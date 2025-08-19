@@ -188,20 +188,22 @@ const App: React.FC = () => {
               <>
                 <button
                     onClick={() => setIsAddFormVisible(true)}
-                    className="flex items-center justify-center bg-sky-600 text-white font-semibold p-2 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
+                    className="flex items-center justify-center bg-sky-600 text-white font-semibold px-3 py-2 md:px-4 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
                     aria-label="구절 추가"
                 >
-                    <PlusIcon className="h-5 w-5 md:mr-2" />
+                    <PlusIcon className="h-5 w-5 mr-1 md:mr-2" />
                     <span className="hidden md:inline">구절 추가</span>
+                    <span className="md:hidden text-sm font-semibold">구절+</span>
                 </button>
                 {activeVerses.length > 0 && (
                    <button
                     onClick={() => setView(AppView.VerseSelection)}
-                    className="flex items-center justify-center bg-amber-500 text-white font-semibold p-2 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
+                    className="flex items-center justify-center bg-amber-500 text-white font-semibold px-3 py-2 md:px-4 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
                     aria-label="복습하기"
                     >
-                    <CardsIcon className="h-5 w-5 md:mr-2" />
+                    <CardsIcon className="h-5 w-5 mr-1 md:mr-2" />
                      <span className="hidden md:inline">복습하기 ({activeVerses.length})</span>
+                     <span className="md:hidden text-sm font-semibold">복습</span>
                     </button>
                 )}
               </>
