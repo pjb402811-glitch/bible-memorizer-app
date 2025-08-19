@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Verse, MemorizationStatus } from '../types';
 import { TrashIcon, ChevronDownIcon, BrainIcon, BellIcon } from './icons';
@@ -36,29 +35,29 @@ const VerseListItem: React.FC<VerseListItemProps> = ({ verse, onUpdateStatus, on
                 (!verse.dueDate || new Date(verse.dueDate) <= today);
 
   return (
-    <li className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-4 flex items-center justify-between space-x-4">
-      <div className="flex-1 min-w-0 flex items-center space-x-3">
+    <li className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-3 sm:p-4 flex items-center justify-between space-x-2 sm:space-x-4">
+      <div className="flex-1 min-w-0 flex items-center space-x-2 sm:space-x-3">
         {isDue && <BellIcon className="h-5 w-5 text-sky-500 flex-shrink-0" title="오늘 복습할 구절입니다."/>}
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-semibold text-slate-800 truncate">{verse.reference}</p>
-          <p className="text-slate-500 mt-1 text-sm truncate">{verse.text}</p>
+          <p className="text-sm sm:text-base font-semibold text-slate-800 truncate">{verse.reference}</p>
+          <p className="text-slate-500 mt-1 text-xs truncate">{verse.text}</p>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1 sm:space-x-2">
          {listType === 'inProgress' && (
             <button 
                 onClick={() => onPractice(verse.id)} 
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 ring-1 ring-inset ring-slate-200 hover:bg-sky-100 hover:text-sky-600 transition-colors duration-200" 
+                className="flex items-center gap-1 rounded-lg p-1.5 sm:px-3 text-sm font-medium text-slate-500 ring-1 ring-inset ring-slate-200 hover:bg-sky-100 hover:text-sky-600 transition-colors duration-200" 
                 title="연습하기"
             >
                 <BrainIcon className="h-5 w-5" />
-                <span>연습</span>
+                <span className="hidden sm:inline">연습</span>
             </button>
          )}
         <div className="relative">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`flex items-center px-3 py-1 text-sm font-semibold rounded-full ${config.buttonClasses} ring-1 ring-inset ${config.ring} focus:outline-none`}
+            className={`flex items-center px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-full ${config.buttonClasses} ring-1 ring-inset ${config.ring} focus:outline-none`}
           >
             {verse.status}
             <ChevronDownIcon className={`h-4 w-4 ml-1 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
@@ -117,7 +116,7 @@ const VerseList: React.FC<VerseListProps> = ({ verses, onUpdateStatus, onDelete,
 
   return (
     <div>
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-800 mb-4">
             {listType === 'inProgress' ? '내 암송 구절' : '완료한 구절'}
         </h2>
         <ul className="space-y-3">

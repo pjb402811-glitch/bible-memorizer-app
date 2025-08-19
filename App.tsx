@@ -172,14 +172,14 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-100/50">
       <header className="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-10 border-b border-slate-200/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <BookIcon className="h-8 w-8 text-sky-600" />
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">성경 암송</h1>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <BookIcon className="h-6 w-6 sm:h-8 sm:w-8 text-sky-600" />
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 tracking-tight">성경 암송</h1>
             {streak.count > 0 && (
-                <div className="flex items-center space-x-1.5 bg-orange-100 text-orange-600 font-bold px-4 py-1 rounded-full">
-                    <FireIcon className="h-5 w-5"/>
-                    <span>{streak.count}일 연속</span>
+                <div className="flex items-center space-x-1 bg-orange-100 text-orange-600 font-bold px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm">
+                    <FireIcon className="h-4 w-4 sm:h-5 sm:w-5"/>
+                    <span>{streak.count}<span className="hidden sm:inline">일 연속</span></span>
                 </div>
             )}
           </div>
@@ -188,18 +188,20 @@ const App: React.FC = () => {
               <>
                 <button
                     onClick={() => setIsAddFormVisible(true)}
-                    className="flex items-center justify-center bg-sky-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
+                    className="flex items-center justify-center bg-sky-600 text-white font-semibold p-2 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
+                    aria-label="구절 추가"
                 >
-                    <PlusIcon className="h-5 w-5 mr-2" />
-                    구절 추가
+                    <PlusIcon className="h-5 w-5 md:mr-2" />
+                    <span className="hidden md:inline">구절 추가</span>
                 </button>
                 {activeVerses.length > 0 && (
                    <button
                     onClick={() => setView(AppView.VerseSelection)}
-                    className="flex items-center justify-center bg-amber-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
+                    className="flex items-center justify-center bg-amber-500 text-white font-semibold p-2 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
+                    aria-label="복습하기"
                     >
-                    <CardsIcon className="h-5 w-5 mr-2" />
-                    복습하기 ({activeVerses.length})
+                    <CardsIcon className="h-5 w-5 md:mr-2" />
+                     <span className="hidden md:inline">복습하기 ({activeVerses.length})</span>
                     </button>
                 )}
               </>
@@ -207,10 +209,10 @@ const App: React.FC = () => {
             <div className="relative">
                 <button
                     onClick={() => setIsSettingsOpen(prev => !prev)}
-                    className="flex flex-col items-center justify-center w-14 h-14 text-slate-600 rounded-full bg-white border-b-4 border-slate-200 active:border-b-2 shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-sky-500 transition-all duration-200"
+                    className="flex flex-col items-center justify-center w-12 h-12 sm:w-14 sm:h-14 text-slate-600 rounded-full bg-white border-b-4 border-slate-200 active:border-b-2 shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-sky-500 transition-all duration-200"
                     aria-label="환경설정"
                 >
-                    <SettingsIcon className="h-6 w-6" />
+                    <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                     <span className="text-xs font-medium mt-1">설정</span>
                 </button>
                 {isSettingsOpen && (
@@ -221,7 +223,7 @@ const App: React.FC = () => {
                                 className="w-full flex items-center text-left px-3 py-1.5 rounded-md text-sm text-slate-700 hover:bg-slate-100"
                             >
                                 <KeyIcon className="h-4 w-4 mr-2" />
-                                API 키 설정
+                                API Key 설정
                             </button>
                         </div>
                     </div>
@@ -231,7 +233,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {view === AppView.Flashcards && (
             <FlashcardMode verses={flashcardSessionVerses} onExit={() => setView(AppView.VerseSelection)} />
         )}
@@ -249,26 +251,26 @@ const App: React.FC = () => {
                 <ProgressTracker verses={verses} dueCount={dueVerses.length} />
                 
                 <div className="mb-6">
-                    <div className="flex space-x-2 rounded-lg bg-slate-200 p-1">
+                    <div className="flex space-x-1 sm:space-x-2 rounded-lg bg-slate-200 p-1">
                         <button
                             onClick={() => setActiveTab('inProgress')}
-                            className={`w-full rounded-md py-2.5 text-lg font-semibold transition-all duration-300 ${
+                            className={`w-full rounded-md py-2 text-sm sm:text-base font-semibold transition-all duration-300 ${
                                 activeTab === 'inProgress'
                                 ? 'bg-white text-sky-600 shadow'
                                 : 'text-slate-600 hover:bg-slate-300/50'
                             }`}
                         >
-                            진행 중 <span className={`ml-2 px-2.5 py-1 rounded-full text-sm ${activeTab === 'inProgress' ? 'bg-sky-100 text-sky-600' : 'bg-slate-300 text-slate-700'}`}>{activeVerses.length}</span>
+                            진행 중 <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${activeTab === 'inProgress' ? 'bg-sky-100 text-sky-600' : 'bg-slate-300 text-slate-700'}`}>{activeVerses.length}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('completed')}
-                            className={`w-full rounded-md py-2.5 text-lg font-semibold transition-all duration-300 ${
+                            className={`w-full rounded-md py-2 text-sm sm:text-base font-semibold transition-all duration-300 ${
                                 activeTab === 'completed'
                                 ? 'bg-white text-sky-600 shadow'
                                 : 'text-slate-600 hover:bg-slate-300/50'
                             }`}
                         >
-                            완료 <span className={`ml-2 px-2.5 py-1 rounded-full text-sm ${activeTab === 'completed' ? 'bg-sky-100 text-sky-600' : 'bg-slate-300 text-slate-700'}`}>{completedVerses.length}</span>
+                            완료 <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${activeTab === 'completed' ? 'bg-sky-100 text-sky-600' : 'bg-slate-300 text-slate-700'}`}>{completedVerses.length}</span>
                         </button>
                     </div>
                 </div>

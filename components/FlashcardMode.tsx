@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Verse } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
@@ -19,13 +18,13 @@ const Flashcard: React.FC<{ verse: Verse; isFlipped: boolean; onFlip: () => void
     <div className="w-full h-full perspective cursor-pointer" onClick={onFlip}>
       <div className={`relative w-full h-full transform-style-3d transition-transform duration-700 ${isFlipped ? 'rotate-y-180' : ''}`}>
         {/* Front of card */}
-        <div className="absolute w-full h-full backface-hidden bg-white rounded-2xl shadow-xl flex flex-col justify-center items-center p-8 text-center">
-          <h2 className="text-5xl md:text-7xl font-bold text-slate-800 font-serif">{verse.reference}</h2>
-          <p className="mt-4 text-slate-500">클릭해서 구절 확인하기</p>
+        <div className="absolute w-full h-full backface-hidden bg-white rounded-2xl shadow-xl flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 text-center">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-800 font-serif">{verse.reference}</h2>
+          <p className="mt-4 text-sm text-slate-500">클릭해서 구절 확인하기</p>
         </div>
         {/* Back of card */}
-        <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-sky-600 rounded-2xl shadow-xl flex flex-col justify-center items-center p-8 text-center">
-          <p className="text-3xl md:text-4xl text-white font-serif leading-relaxed whitespace-pre-line">
+        <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-sky-600 rounded-2xl shadow-xl flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 text-center">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white font-serif leading-relaxed sm:leading-relaxed whitespace-pre-line">
             {formatVerseForDisplay(verse.text)}
           </p>
         </div>
@@ -74,21 +73,21 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ verses, onExit }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-100 z-40 flex flex-col p-4 md:p-8">
-       <div className="relative flex justify-center items-center mb-4 w-full max-w-4xl mx-auto h-16">
+    <div className="fixed inset-0 bg-slate-100 z-40 flex flex-col p-2 sm:p-4">
+       <div className="relative flex justify-center items-center mb-4 w-full max-w-4xl mx-auto h-14 sm:h-16">
         <button
             onClick={onExit}
-            className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center bg-white text-slate-700 font-bold px-5 py-3 rounded-xl shadow-md border border-slate-200 hover:bg-slate-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200 transform hover:-translate-y-0.5"
+            className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center bg-white text-slate-700 font-bold px-3 py-2 sm:px-4 sm:py-2 rounded-xl shadow-md border border-slate-200 hover:bg-slate-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200 transform hover:-translate-y-0.5"
             aria-label="목록으로 돌아가기"
         >
-            <ChevronLeftIcon className="h-7 w-7 mr-2" />
-            <span className="text-xl">목록으로</span>
+            <ChevronLeftIcon className="h-5 w-5 sm:h-6 sm:w-6 sm:mr-2" />
+            <span className="hidden sm:inline text-base sm:text-lg">목록으로</span>
         </button>
-        <h2 className="text-xl font-bold text-slate-700">복습 모드</h2>
+        <h2 className="text-base sm:text-lg font-bold text-slate-700">복습 모드</h2>
       </div>
 
       <div className="flex-grow flex items-center justify-center">
-        <div className="w-full max-w-4xl aspect-[16/9] mx-auto relative flex items-center justify-center">
+        <div className="w-full max-w-4xl aspect-[10/9] sm:aspect-[16/9] mx-auto relative flex items-center justify-center">
             {verses.length > 1 && (
                 <>
                     <button onClick={goToPrev} className="absolute left-0 -translate-x-full p-2 rounded-full bg-white shadow-md hover:bg-slate-100 text-slate-600 hidden md:block">
@@ -106,7 +105,7 @@ const FlashcardMode: React.FC<FlashcardModeProps> = ({ verses, onExit }) => {
         </div>
       </div>
       
-      <div className="text-center mt-4 text-slate-500 font-medium">
+      <div className="text-center mt-4 text-slate-500 font-medium text-sm">
         카드 {currentIndex + 1} / {verses.length}
       </div>
 
