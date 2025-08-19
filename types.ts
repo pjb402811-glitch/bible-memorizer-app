@@ -1,6 +1,6 @@
 
 export enum MemorizationStatus {
-  NotStarted = '시작 안 함',
+  NotStarted = '시작전',
   InProgress = '진행 중',
   Mastered = '완료',
 }

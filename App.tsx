@@ -7,7 +7,7 @@ import ProgressTracker from './components/ProgressTracker';
 import FlashcardMode from './components/FlashcardMode';
 import PracticeMode from './components/PracticeMode';
 import VerseSelection from './components/VerseSelection';
-import { BookIcon, CardsIcon, PlusIcon, FireIcon, SettingsIcon, KeyIcon } from './components/icons';
+import { BookIcon, CardsIcon, PlusIcon, SettingsIcon, KeyIcon } from './components/icons';
 import { useApiKey } from './hooks/useApiKey';
 import ApiKeyModal from './components/ApiKeyModal';
 
@@ -176,34 +176,28 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-2">
             <BookIcon className="h-6 w-6 sm:h-8 sm:w-8 text-sky-600" />
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 tracking-tight">성경 암송</h1>
-            {streak.count > 0 && (
-                <div className="flex items-center space-x-1 bg-orange-100 text-orange-600 font-bold px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm">
-                    <FireIcon className="h-4 w-4 sm:h-5 sm:w-5"/>
-                    <span>{streak.count}<span className="hidden sm:inline">일 연속</span></span>
-                </div>
-            )}
           </div>
           <div className="flex items-center space-x-2" ref={settingsRef}>
             {view === AppView.List && !practicingVerse && activeTab === 'inProgress' && (
               <>
                 <button
                     onClick={() => setIsAddFormVisible(true)}
-                    className="flex items-center justify-center bg-sky-600 text-white font-semibold px-3 py-2 md:px-4 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
+                    className="flex items-center justify-center bg-sky-600 text-white font-semibold px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-all duration-200"
                     aria-label="구절 추가"
                 >
-                    <PlusIcon className="h-5 w-5 mr-1 md:mr-2" />
+                    <PlusIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                     <span className="hidden md:inline">구절 추가</span>
-                    <span className="md:hidden text-sm font-semibold">구절+</span>
+                    <span className="md:hidden text-xs font-semibold">구절+</span>
                 </button>
                 {activeVerses.length > 0 && (
                    <button
                     onClick={() => setView(AppView.VerseSelection)}
-                    className="flex items-center justify-center bg-amber-500 text-white font-semibold px-3 py-2 md:px-4 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
+                    className="flex items-center justify-center bg-amber-500 text-white font-semibold px-2.5 py-1.5 md:px-4 md:py-2 rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-200"
                     aria-label="복습하기"
                     >
-                    <CardsIcon className="h-5 w-5 mr-1 md:mr-2" />
+                    <CardsIcon className="h-4 w-4 md:h-5 md:w-5 mr-1 md:mr-2" />
                      <span className="hidden md:inline">복습하기 ({activeVerses.length})</span>
-                     <span className="md:hidden text-sm font-semibold">복습</span>
+                     <span className="md:hidden text-xs font-semibold">복습</span>
                     </button>
                 )}
               </>
