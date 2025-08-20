@@ -1,112 +1,74 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import type { Verse, FillInTheBlanksExercise } from "../types";
+import { GoogleGenAI, Type } from '@google/genai';
+import type { MemorizationVerse, QuizData } from '../types';
 
-export const fetchVerses = async (reference: string, apiKey: string): Promise<Pick<Verse, 'reference' | 'text'>[]> => {
+export const generateQuiz = async (verse: MemorizationVerse, apiKey: string, excludeAnswers: string[] = []): Promise<QuizData> => {
     if (!apiKey) {
       throw new Error("API 키가 설정되지 않았습니다. 설정 메뉴에서 API 키를 입력해주세요.");
     }
   
     try {
-      const ai = new GoogleGenAI({ apiKey });
-      const prompt = `"${reference}"에 해당하는 성경 구절을 찾아주세요. 반드시 '개역개정' 한글 성경 버전이어야 합니다. 주소가 범위를 나타내는 경우(예: 창세기 1:1-5), 해당 범위의 모든 구절을 개별적으로 반환해야 합니다. 주소가 단일 구절인 경우에도 배열에 하나의 객체만 포함하여 반환해야 합니다. 응답은 반드시 다음 JSON 스키마를 따르는 JSON 배열이어야 합니다. 각 객체는 하나의 구절을 나타내며, 'reference' (정식 구절 주소, 예: '창세기 1:1')와 'text' (오직 한국어 구절 본문) 필드를 포함해야 합니다. 다른 설명, 영어 번역, 또는 추가 텍스트는 절대 포함하지 마세요. 만약 유효한 구절을 찾을 수 없다면, 빈 배열을 반환해주세요.`;
-      
-      const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
-          config: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                  type: Type.ARRAY,
-                  items: {
-                      type: Type.OBJECT,
-                      properties: {
-                          reference: { 
-                              type: Type.STRING,
-                              description: "The full, canonical Bible reference (e.g., 'John 3:16')."
-                          },
-                          text: { 
-                              type: Type.STRING,
-                              description: "The full text of the verse in Korean."
-                          }
-                      },
-                      required: ["reference", "text"]
-                  }
-              }
-          }
-      });
-  
-      const jsonText = response.text.trim();
-      const parsedVerses = JSON.parse(jsonText);
-  
-      if (!Array.isArray(parsedVerses)) {
-          throw new Error("AI로부터 잘못된 형식의 응답을 받았습니다.");
-      }
-      
-      if (parsedVerses.length === 0) {
-          throw new Error(`"${reference}"에 해당하는 구절을 찾을 수 없습니다. 구절 주소를 확인하고 다시 시도해주세요.`);
-      }
-  
-      return parsedVerses;
-    } catch (error) {
-      console.error("Error fetching verses from Gemini API:", error);
-      // Re-throwing a more user-friendly error
-      if (error instanceof Error && error.message.includes("찾을 수 없습니다")) {
-          throw error;
-      }
-      throw new Error(`"${reference}" 구절 텍스트를 가져오는 데 실패했습니다. API 키가 유효한지 확인하거나 네트워크 문제를 확인해주세요.`);
-    }
-  };
-  
-
-export const generateFillInTheBlanksExercise = async (verseText: string, apiKey: string): Promise<FillInTheBlanksExercise> => {
-    if (!apiKey) {
-        throw new Error("API 키가 설정되지 않았습니다. 설정 메뉴에서 API 키를 입력해주세요.");
-    }
-
-    try {
         const ai = new GoogleGenAI({ apiKey });
-        const prompt = `다음 한국어 성경 구절 텍스트를 사용하여 빈칸 채우기 연습 문제를 만들어 주세요: "${verseText}". 
-        지침:
-        1. 신학적으로 중요하거나 핵심적인 어절(단어와 조사가 결합된 형태) 3~5개를 제거합니다. **매우 중요: 단어에서 조사를 분리하지 마세요. 예를 들어, '사도로'가 있다면 '사도'가 아닌 '사도로' 전체를 하나의 단위로 취급하여 제거해야 합니다.**
-        2. 제거된 어절을 대체할 '____'가 포함된 구절을 만듭니다.
-        3. 문맥상 그럴듯하지만 오답인 '오답 선택지' 단어 3개를 만듭니다. 오답 선택지는 정답 어절의 단순 변형이 아니어야 합니다.
-        4. 제공된 JSON 스키마를 엄격히 준수하여 응답을 반환합니다. 'allChoices' 필드에는 정답 어절과 오답 단어가 모두 포함되어 무작위로 섞여 있어야 합니다.`;
+        let prompt = `'${verse.koreanBookName} ${verse.chapter}:${verse.verse} - "${verse.text}"' 구절을 위한 빈칸 채우기 퀴즈를 만들어줘.
+        중요: 입력된 구절 텍스트에 포함된 줄바꿈(\\n)을 출력 'quizText'에서도 그대로 유지해줘.
+        1. 구절에서 2개 또는 3개의 핵심 단어를 빈칸으로 만들어줘.
+        2. 빈칸은 '__BLANK__'로 표시해줘.
+        3. 정답 단어들과 함께, 문법적으로 유사하지만 틀린 선택지 3-4개를 만들어줘.
+        4. 응답은 반드시 다음 JSON 스키마를 준수해야 해. 다른 설명은 절대 추가하지 마.`;
+
+        if (excludeAnswers.length > 0) {
+            prompt += `\n\n중요: 이전 퀴즈와 다른 단어를 빈칸으로 만들어줘. 다음 단어들은 정답으로 사용하지 마: [${excludeAnswers.join(', ')}]`;
+        }
+        
+        prompt += `
+        
+        퀴즈 생성 예시:
+        입력 구절: "믿음은 바라는 것들의 실상이요\\n보이지 않는 것들의 증거니"
+        출력 JSON 예시:
+        {
+          "quizText": "믿음은 바라는 것들의 __BLANK__\\n보이지 않는 것들의 __BLANK__",
+          "answers": ["실상이요", "증거니"],
+          "distractors": ["소망이요", "기쁨이요", "약속이니"]
+        }`;
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {
-                        verseWithBlanks: { type: Type.STRING },
-                        correctWords: { 
-                            type: Type.ARRAY,
-                            items: { type: Type.STRING }
+                        quizText: {
+                            type: Type.STRING,
+                            description: "The verse text with blanks represented by '__BLANK__'."
                         },
-                        allChoices: {
+                        answers: {
                             type: Type.ARRAY,
-                            items: { type: Type.STRING }
+                            items: { type: Type.STRING },
+                            description: "An array of the correct words for the blanks, in order."
+                        },
+                        distractors: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: "An array of plausible but incorrect word choices."
                         }
                     },
-                    required: ["verseWithBlanks", "correctWords", "allChoices"],
-                },
-            },
+                    required: ["quizText", "answers", "distractors"]
+                }
+            }
         });
-        
-        const jsonText = response.text.trim();
-        const parsed = JSON.parse(jsonText);
-        
-        // Basic validation
-        if (!parsed.verseWithBlanks || !Array.isArray(parsed.correctWords) || !Array.isArray(parsed.allChoices)) {
-            throw new Error("AI가 반환한 데이터 형식이 올바르지 않습니다.");
-        }
 
-        return parsed as FillInTheBlanksExercise;
+        const jsonText = response.text.trim();
+        const parsedQuiz = JSON.parse(jsonText) as QuizData;
+
+        if (!parsedQuiz.quizText || !parsedQuiz.answers || !parsedQuiz.distractors) {
+            throw new Error("AI로부터 잘못된 형식의 퀴즈 데이터를 받았습니다.");
+        }
+        
+        return parsedQuiz;
 
     } catch (error) {
-        console.error("Error generating fill-in-the-blanks exercise:", error);
-        throw new Error("연습 문제를 생성하는 데 실패했습니다. API 키가 유효한지 확인하거나 잠시 후 다시 시도해주세요.");
+        console.error("Error generating quiz from Gemini API:", error);
+        throw new Error("퀴즈를 생성하는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
     }
 };
