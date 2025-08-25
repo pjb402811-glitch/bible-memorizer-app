@@ -56,7 +56,7 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         try {
             const ai = new GoogleGenAI({ apiKey });
             const bibleBookList = BIBLE_BOOKS.map(b => `${b.koreanName} (${b.name})`).join(', ');
-            const prompt = `사용자 입력값 "${verseReference}"에 해당하는 성경 구절을 '개역개정' 한글 성경 버전으로 찾아줘. 구절의 'text' 내용은 반드시 한글이어야 하며, 다른 언어가 섞이면 안돼. 입력이 구절 범위를 포함하는 경우 (예: 로마서 8:1-10), 범위 내의 모든 구절을 각각 반환해야 해. 결과는 반드시 아래 JSON 스키마를 따르는 JSON 배열이어야 해. 각 객체는 하나의 구절을 나타내.
+            const prompt = `사용자 입력값 "${verseReference}"에 해당하는 성경 구절을 '새번역' 한글 성경 버전으로 찾아줘. 구절의 'text' 내용은 반드시 한글이어야 하며, 다른 언어가 섞이면 안돼. 입력이 구절 범위를 포함하는 경우 (예: 로마서 8:1-10), 범위 내의 모든 구절을 각각 반환해야 해. 결과는 반드시 아래 JSON 스키마를 따르는 JSON 배열이어야 해. 각 객체는 하나의 구절을 나타내.
 매우 중요: 'text' 필드에는 구절 본문을 포함하고, 의미 단위에 따라 반드시 줄바꿈 문자(\\n)를 삽입하여 텍스트가 두 줄 이상이 되도록 만들어줘. 짧은 구절이라도 가급적 줄바꿈을 포함해줘.
 성경 목록을 참고해서 정확한 영어 'bookName'과 한국어 'koreanBookName'을 사용해줘: [${bibleBookList}]. 다른 설명이나 추가 텍스트는 절대 포함하지 마. 유효한 구절을 찾을 수 없다면 빈 배열을 반환해줘.`;
 
