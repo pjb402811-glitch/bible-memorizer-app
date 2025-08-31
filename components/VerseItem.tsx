@@ -57,9 +57,9 @@ const VerseItem: React.FC<VerseItemProps> = ({ verse, onDelete, onStatusChange, 
 
     return (
         <div className="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
-            <div className="flex justify-between items-start gap-4">
-                <div className="flex items-start gap-3 flex-grow min-w-0">
-                    <LightbulbIcon className={`w-6 h-6 ${statusIconColorMap[verse.status]} mt-1 flex-shrink-0`}/>
+            <div className="flex justify-between items-center gap-4">
+                <div className="flex items-center gap-3 flex-grow min-w-0">
+                    <LightbulbIcon className={`w-6 h-6 ${statusIconColorMap[verse.status]} flex-shrink-0`}/>
                     <div className="flex-grow">
                         <div className="flex items-center gap-3 flex-wrap">
                             <h3 className="font-bold text-slate-100">{reference}</h3>
@@ -80,7 +80,6 @@ const VerseItem: React.FC<VerseItemProps> = ({ verse, onDelete, onStatusChange, 
                                 </button>
                             </div>
                         </div>
-                        <p className="mt-1 text-slate-400 text-sm break-words whitespace-pre-wrap">{verse.text}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

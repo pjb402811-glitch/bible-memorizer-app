@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, Type, Chat } from '@google/genai';
 import { BIBLE_BOOKS, LORDS_PRAYER, APOSTLES_CREED } from '../constants';
 import type { VerseData, Book } from '../types';
 
@@ -30,6 +30,8 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
     const [fetchedVerses, setFetchedVerses] = useState<VerseData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [chatSession, setChatSession] = useState<Chat | null>(null);
+    const [feedbackText, setFeedbackText] = useState('');
 
     // Manual Mode state
     const [manualBook, setManualBook] = useState<Book>(BIBLE_BOOKS[0]);
@@ -47,6 +49,8 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         setError(null);
         setVerseReference('');
         setIsLoading(false);
+        setChatSession(null);
+        setFeedbackText('');
         // Manual State
         setManualBook(BIBLE_BOOKS[0]);
         setManualChapter('');
@@ -76,14 +80,20 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         try {
             const ai = new GoogleGenAI({ apiKey });
             const bibleBookList = BIBLE_BOOKS.map(b => `${b.koreanName} (${b.name})`).join(', ');
-            const prompt = `사용자 입력값 "${verseReference}"에 해당하는 성경 구절을 '새번역' 한글 성경 버전으로 찾아줘. 구절의 'text' 내용은 반드시 한글이어야 하며, 다른 언어가 섞이면 안돼. 입력이 구절 범위를 포함하는 경우 (예: 로마서 8:1-10), 범위 내의 모든 구절을 각각 반환해야 해. 결과는 반드시 아래 JSON 스키마를 따르는 JSON 배열이어야 해. 각 객체는 하나의 구절을 나타내.
-매우 중요: 'text' 필드에는 구절 본문을 포함하고, 의미 단위에 따라 반드시 줄바꿈 문자(\\n)를 삽입하여 텍스트가 두 줄 이상이 되도록 만들어줘. 짧은 구절이라도 가급적 줄바꿈을 포함해줘.
-성경 목록을 참고해서 정확한 영어 'bookName'과 한국어 'koreanBookName'을 사용해줘: [${bibleBookList}]. 다른 설명이나 추가 텍스트는 절대 포함하지 마. 유효한 구절을 찾을 수 없다면 빈 배열을 반환해줘.`;
+            
+            const systemInstruction = `You are a Bible verse expert specializing in the '새번역' (New Korean Revised Version) of the Korean Bible. Your task is to find and return Bible verses based on user requests.
+- Always provide verses from the '새번역' version.
+- The user may provide feedback if your result is not from the '새번역' version. Use this feedback to correct your search and provide the right version.
+- The response must be a JSON array following the provided schema.
+- Each object in the array represents a single verse.
+- For the 'text' field, include the verse content and insert newline characters (\\n) for readability, preferably at natural breaks in the phrase. Even short verses should have newlines.
+- Use the provided Bible book list to ensure the correct English 'bookName' and Korean 'koreanBookName': [${bibleBookList}].
+- If you cannot find a valid verse, return an empty array. Do not include any other explanations or text outside the JSON array.`;
 
-            const response = await ai.models.generateContent({
+            const newChat = ai.chats.create({
                 model: 'gemini-2.5-flash',
-                contents: prompt,
                 config: {
+                    systemInstruction,
                     responseMimeType: "application/json",
                     responseSchema: {
                         type: Type.ARRAY,
@@ -105,6 +115,10 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
                 }
             });
 
+            setChatSession(newChat);
+
+            const initialPrompt = `사용자 입력값 "${verseReference}"에 해당하는 성경 구절을 찾아줘.`;
+            const response = await newChat.sendMessage({ message: initialPrompt });
             const versesData = JSON.parse(response.text) as VerseData[];
 
             if (!versesData || versesData.length === 0) {
@@ -116,6 +130,31 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         } catch (e) {
             console.error(e);
             setError("구절을 가져오는 중 오류가 발생했습니다. 입력한 구절이 정확한지, API 키가 유효한지 확인해주세요.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleFeedbackSubmit = async () => {
+        if (!chatSession || !feedbackText.trim()) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await chatSession.sendMessage({ message: feedbackText });
+            const versesData = JSON.parse(response.text) as VerseData[];
+
+            if (!versesData || versesData.length === 0) {
+                setError("피드백을 바탕으로 구절을 찾을 수 없습니다. 다시 시도해주세요.");
+                 setFetchedVerses([]);
+            } else {
+                setFetchedVerses(versesData);
+            }
+            setFeedbackText('');
+        } catch (e) {
+             console.error(e);
+            setError("피드백 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
         } finally {
             setIsLoading(false);
         }
@@ -177,6 +216,13 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         return '구절 저장';
     };
 
+    const handleAiTabReset = () => {
+        setFetchedVerses([]);
+        setVerseReference('');
+        setChatSession(null);
+        setError(null);
+    };
+
 
     if (!isOpen) return null;
 
@@ -228,7 +274,7 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
                                     disabled={isLoading}
                                     className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
                                 >
-                                    {isLoading ? (
+                                    {isLoading && !feedbackText ? (
                                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                     ) : (
                                         <SparklesIcon className="w-5 h-5"/>
@@ -312,7 +358,7 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
                                 <h3 className="font-bold text-slate-200">
                                     가져온 구절 ({fetchedVerses.length}개)
                                 </h3>
-                                <button onClick={() => { setFetchedVerses([]); setVerseReference(''); }} className="text-sm text-slate-400 hover:text-slate-200 font-medium">
+                                <button onClick={handleAiTabReset} className="text-sm text-slate-400 hover:text-slate-200 font-medium">
                                     초기화
                                 </button>
                             </div>
@@ -327,6 +373,33 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
                                         </p>
                                     </div>
                                 ))}
+                            </div>
+                             <div className="mt-4 pt-4 border-t border-slate-700">
+                                <h4 className="text-sm font-semibold text-slate-300">결과가 정확하지 않나요?</h4>
+                                <p className="text-xs text-slate-400 mb-2">AI에게 피드백을 보내 더 정확한 구절을 찾아달라고 요청할 수 있습니다. (예: "새번역이 아니에요")</p>
+                                <div className="grid grid-cols-[1fr_auto] gap-2">
+                                    <input
+                                        type="text"
+                                        value={feedbackText}
+                                        onChange={(e) => setFeedbackText(e.target.value)}
+                                        className="focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400"
+                                        placeholder="피드백 입력..."
+                                        disabled={isLoading}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleFeedbackSubmit()}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleFeedbackSubmit}
+                                        disabled={isLoading || !feedbackText.trim()}
+                                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading && feedbackText ? (
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        ) : (
+                                        '수정 요청'
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
