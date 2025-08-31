@@ -57,8 +57,8 @@ const VerseItem: React.FC<VerseItemProps> = ({ verse, onDelete, onStatusChange, 
 
     return (
         <div className="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
-            <div className="flex justify-between items-center gap-4">
-                <div className="flex items-center gap-3 flex-grow min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-3 flex-grow min-w-0 w-full">
                     <LightbulbIcon className={`w-6 h-6 ${statusIconColorMap[verse.status]} flex-shrink-0`}/>
                     <div className="flex-grow">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -82,7 +82,7 @@ const VerseItem: React.FC<VerseItemProps> = ({ verse, onDelete, onStatusChange, 
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
                     <select
                         value={verse.status}
                         onChange={handleStatusChange}
