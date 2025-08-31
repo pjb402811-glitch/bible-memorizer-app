@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MemorizationVerse } from '../types';
 
 const XIcon: React.FC<{ className: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
@@ -15,7 +15,9 @@ interface FlashcardModalProps {
 const FlashcardModal: React.FC<FlashcardModalProps> = ({ verse, onClose }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
-    const reference = `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
+    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed')
+        ? verse.koreanBookName
+        : `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={onClose} role="dialog" aria-modal="true">
@@ -41,7 +43,7 @@ const FlashcardModal: React.FC<FlashcardModalProps> = ({ verse, onClose }) => {
                             </h2>
                         </div>
                         {/* Back of the card */}
-                        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-indigo-700 text-white rounded-lg shadow-2xl flex items-center justify-center p-8 sm:p-10 text-center">
+                        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-indigo-700 text-white rounded-lg shadow-2xl p-8 sm:p-10 text-left overflow-y-auto">
                             <p className="text-xl sm:text-2xl font-sans font-bold leading-relaxed whitespace-pre-wrap">
                                 {verse.text}
                             </p>

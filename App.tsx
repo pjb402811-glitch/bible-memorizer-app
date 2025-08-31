@@ -7,34 +7,13 @@ import VerseList from './components/VerseList';
 import QuizModal from './components/QuizModal';
 import FlashcardModal from './components/FlashcardModal';
 import GoalSettingsModal from './components/GoalSettingsModal';
+import { LORDS_PRAYER } from './constants';
 import type { MemorizationVerse, VerseStatus, VerseData } from './types';
 
 const MOCK_VERSES: MemorizationVerse[] = [
     {
-        id: '1',
-        bookName: 'Romans',
-        koreanBookName: '로마서',
-        chapter: 1,
-        verse: 1,
-        text: '예수 그리스도의 종 바울은 사도로 부르심을 받아\n하나님의 복음을 위하여 택정함을 입었으니',
-        status: 'in-progress',
-    },
-    {
-        id: '2',
-        bookName: 'Romans',
-        koreanBookName: '로마서',
-        chapter: 1,
-        verse: 2,
-        text: '이 복음은 하나님이 선지자들을 통하여\n그의 아들에 관하여 성경에 미리 약속하신 것이라',
-        status: 'in-progress',
-    },
-    {
-        id: '3',
-        bookName: 'Hebrews',
-        koreanBookName: '히브리서',
-        chapter: 11,
-        verse: 1,
-        text: '믿음은 바라는 것들의 실상이요\n보이지 않는 것들의 증거니',
+        ...LORDS_PRAYER,
+        id: 'lords-prayer-initial',
         status: 'in-progress',
     },
 ];

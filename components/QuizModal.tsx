@@ -117,6 +117,9 @@ const QuizModal: React.FC<QuizModalProps> = ({ verse, onClose, apiKey }) => {
         return JSON.stringify(userAnswers) === JSON.stringify(quizData.answers);
     }, [isConfirmed, userAnswers, quizData]);
 
+    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed')
+        ? verse.koreanBookName
+        : `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
 
     const renderBody = () => {
         if (isLoading) {
@@ -164,7 +167,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ verse, onClose, apiKey }) => {
         return (
              <>
                 <div className="overflow-y-auto p-6 sm:p-8">
-                    <div className="bg-slate-900 shadow-md rounded-lg p-6 w-full text-center mb-6">
+                    <div className="bg-slate-900 shadow-md rounded-lg p-6 w-full text-left mb-6">
                         <p className="text-xl sm:text-2xl font-bold leading-loose text-slate-200 whitespace-pre-wrap">
                             {textParts.map((part, index) => (
                                 <React.Fragment key={index}>
@@ -237,7 +240,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ verse, onClose, apiKey }) => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
             <div className="bg-slate-800 rounded-xl shadow-xl w-full max-w-2xl transform transition-all overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
-                    <h2 className="text-lg font-bold text-slate-200">{verse.koreanBookName} {verse.chapter}:{verse.verse} 퀴즈</h2>
+                    <h2 className="text-lg font-bold text-slate-200">{reference} 퀴즈</h2>
                     <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
                         <XIcon className="w-6 h-6" />
                     </button>

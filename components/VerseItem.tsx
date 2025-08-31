@@ -46,7 +46,9 @@ interface VerseItemProps {
 }
 
 const VerseItem: React.FC<VerseItemProps> = ({ verse, onDelete, onStatusChange, onPractice, onFlashcard }) => {
-    const reference = `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
+    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed')
+        ? verse.koreanBookName
+        : `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
     const currentStatus = statusMap[verse.status];
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
