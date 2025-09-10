@@ -15,7 +15,7 @@ interface FlashcardModalProps {
 const FlashcardModal: React.FC<FlashcardModalProps> = ({ verse, onClose }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
-    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed')
+    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed' || verse.bookName === 'LifeStudy')
         ? verse.koreanBookName
         : `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
 

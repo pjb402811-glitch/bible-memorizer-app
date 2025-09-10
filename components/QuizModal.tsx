@@ -117,7 +117,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ verse, onClose, apiKey }) => {
         return JSON.stringify(userAnswers) === JSON.stringify(quizData.answers);
     }, [isConfirmed, userAnswers, quizData]);
 
-    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed')
+    const reference = (verse.bookName === 'LordsPrayer' || verse.bookName === 'ApostlesCreed' || verse.bookName === 'LifeStudy')
         ? verse.koreanBookName
         : `${verse.koreanBookName} ${verse.chapter}:${verse.verse}`;
 

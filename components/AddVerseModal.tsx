@@ -4,13 +4,13 @@ import { BIBLE_BOOKS, LORDS_PRAYER, APOSTLES_CREED } from '../constants';
 import type { VerseData, Book } from '../types';
 
 const XIcon: React.FC<{ className: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
 
 const SparklesIcon: React.FC<{ className: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.47-1.47L12.94 18.25l1.188-.648a2.25 2.25 0 011.47 1.47L16.25 20l.648.812a2.25 2.25 0 011.47-1.47l1.188-.648-.648 1.188a2.25 2.25 0 01-1.47 1.47z" />
     </svg>
 );
@@ -23,7 +23,7 @@ interface AddVerseModalProps {
 }
 
 const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVerses, apiKey }) => {
-    const [addMode, setAddMode] = useState<'ai' | 'manual' | 'creed'>('ai');
+    const [addMode, setAddMode] = useState<'ai' | 'manual' | 'creed' | 'study'>('ai');
     
     // AI Mode state
     const [verseReference, setVerseReference] = useState('');
@@ -42,6 +42,10 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
     // Creed Mode state
     const [selectedCreeds, setSelectedCreeds] = useState<VerseData[]>([]);
 
+    // Study Mode state
+    const [studyTitle, setStudyTitle] = useState('');
+    const [studyContent, setStudyContent] = useState('');
+
 
     const handleReset = () => {
         // AI State
@@ -58,6 +62,9 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         setManualText('');
         // Creed State
         setSelectedCreeds([]);
+        // Study State
+        setStudyTitle('');
+        setStudyContent('');
         // General state
         setAddMode('ai');
     };
@@ -164,280 +171,224 @@ const AddVerseModal: React.FC<AddVerseModalProps> = ({ isOpen, onClose, onAddVer
         if (addMode === 'ai' && fetchedVerses.length > 0) {
             onAddVerses(fetchedVerses);
         } else if (addMode === 'manual') {
-             const chapterNum = parseInt(manualChapter, 10);
-            const verseNum = parseInt(manualVerse, 10);
-            if (!chapterNum || !verseNum || !manualText.trim()) {
-                setError("모든 필드를 올바르게 입력해주세요.");
-                return;
+            if (manualBook && manualChapter && manualVerse && manualText.trim()) {
+                const newVerse: VerseData = {
+                    bookName: manualBook.name,
+                    koreanBookName: manualBook.koreanName,
+                    chapter: parseInt(manualChapter, 10),
+                    verse: parseInt(manualVerse, 10),
+                    text: manualText.trim(),
+                };
+                onAddVerses([newVerse]);
             }
-             const newVerse: VerseData = {
-                bookName: manualBook.name,
-                koreanBookName: manualBook.koreanName,
-                chapter: chapterNum,
-                verse: verseNum,
-                text: manualText.trim(),
-            };
-            onAddVerses([newVerse]);
-        } else if (addMode === 'creed' && selectedCreeds.length > 0) {
-            onAddVerses(selectedCreeds);
-        }
-    };
-
-    const handleCreedSelect = (creed: VerseData) => {
-        if (!selectedCreeds.some(c => c.bookName === creed.bookName)) {
-            setSelectedCreeds(prev => [...prev, creed]);
+        } else if (addMode === 'creed') {
+            if (selectedCreeds.length > 0) {
+                onAddVerses(selectedCreeds);
+            }
+        } else if (addMode === 'study') {
+            if (studyTitle.trim() && studyContent.trim()) {
+                const studyVerse: VerseData = {
+                    bookName: 'LifeStudy',
+                    koreanBookName: studyTitle.trim(),
+                    chapter: 1,
+                    verse: 1,
+                    text: studyContent.trim(),
+                };
+                onAddVerses([studyVerse]);
+            }
         }
     };
     
-    const getTabClassName = (mode: 'ai' | 'manual' | 'creed') => {
-        const baseClasses = 'shrink-0 border-b-2 py-3 px-2 text-sm font-bold transition-colors';
-        if (addMode === mode) {
-            return `${baseClasses} border-indigo-500 text-indigo-400`;
-        }
-        return `${baseClasses} border-transparent text-slate-400 hover:border-slate-500 hover:text-slate-200`;
+    const isSaveDisabled = () => {
+        if (isLoading) return true;
+        if (addMode === 'ai') return fetchedVerses.length === 0;
+        if (addMode === 'manual') return !(manualBook && manualChapter && manualVerse && manualText.trim());
+        if (addMode === 'creed') return selectedCreeds.length === 0;
+        if (addMode === 'study') return !(studyTitle.trim() && studyContent.trim());
+        return true;
     };
 
-    const isManualFormInvalid = !manualChapter || !manualVerse || !manualText.trim();
-    const isSaveDisabled = isLoading || 
-        (addMode === 'ai' && fetchedVerses.length === 0) || 
-        (addMode === 'manual' && isManualFormInvalid) ||
-        (addMode === 'creed' && selectedCreeds.length === 0);
-
-    const getSaveButtonText = () => {
-        if (addMode === 'ai') {
-            return fetchedVerses.length > 0 ? `${fetchedVerses.length}개 구절 저장` : '구절 저장';
+    const getTabClassName = (tabName: 'ai' | 'manual' | 'creed' | 'study') => {
+        const base = "px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-indigo-500 w-full";
+        if (addMode === tabName) {
+            return `${base} bg-indigo-600 text-white`;
         }
-        if (addMode === 'manual') {
-            return '직접 입력한 구절 저장';
-        }
-        if (addMode === 'creed') {
-             return selectedCreeds.length > 0 ? `${selectedCreeds.length}개 항목 저장` : '항목 저장';
-        }
-        return '구절 저장';
+        return `${base} bg-slate-700 text-slate-300 hover:bg-slate-600`;
     };
-
-    const handleAiTabReset = () => {
-        setFetchedVerses([]);
-        setVerseReference('');
-        setChatSession(null);
-        setError(null);
+    
+    const handleCreedToggle = (creed: VerseData) => {
+        setSelectedCreeds(prev =>
+            prev.some(c => c.bookName === creed.bookName)
+                ? prev.filter(c => c.bookName !== creed.bookName)
+                : [...prev, creed]
+        );
     };
 
 
-    if (!isOpen) return null;
+    if (!isOpen) {
+        return null;
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
-            <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md transform transition-all flex flex-col max-h-[90vh]">
-                <div className="p-6 flex-shrink-0">
+            <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-slate-700 flex-shrink-0">
                     <div className="flex items-start justify-between">
                         <h2 className="text-xl font-bold text-slate-100">새 구절 추가</h2>
                         <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
                             <XIcon className="w-6 h-6" />
                         </button>
                     </div>
-
-                    <div className="mt-4 border-b border-slate-700">
-                        <nav className="flex -mb-px gap-4" aria-label="Tabs">
-                            <button onClick={() => { setAddMode('ai'); setError(null); }} className={getTabClassName('ai')}>
-                                AI로 찾기
-                            </button>
-                            <button onClick={() => { setAddMode('manual'); setError(null); }} className={getTabClassName('manual')}>
-                                직접 입력
-                            </button>
-                             <button onClick={() => { setAddMode('creed'); setError(null); }} className={getTabClassName('creed')}>
-                                주요 기도문
-                            </button>
-                        </nav>
+                    
+                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-900 p-1 rounded-lg">
+                        <button onClick={() => setAddMode('ai')} className={getTabClassName('ai')}>AI로 추가</button>
+                        <button onClick={() => setAddMode('manual')} className={getTabClassName('manual')}>직접 추가</button>
+                        <button onClick={() => setAddMode('creed')} className={getTabClassName('creed')}>주요 기도문</button>
+                        <button onClick={() => setAddMode('study')} className={getTabClassName('study')}>삶공부</button>
                     </div>
                 </div>
 
-                <div className="overflow-y-auto px-6 pb-6">
-                     {addMode === 'ai' && (
-                        <div className="mt-6">
-                            <label htmlFor="verse-reference" className="block text-sm font-medium text-slate-300 mb-1">
-                               구절 입력 (예: 요한복음 3:16 또는 로마서 1:1-10)
-                            </label>
-                            <div className="grid grid-cols-[1fr_auto] gap-2">
+                <div className="overflow-y-auto p-6 flex-grow">
+                    {/* AI Mode */}
+                    {addMode === 'ai' && (
+                         <div>
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input
                                     type="text"
-                                    name="verse-reference"
-                                    id="verse-reference"
                                     value={verseReference}
                                     onChange={(e) => setVerseReference(e.target.value)}
-                                    className="focus:ring-blue-500 focus:border-blue-500 block w-full text-lg p-3 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400"
-                                    placeholder="히브리서 11:1-3"
+                                    placeholder="예: 요한복음 3:16-18, 시편 23편"
+                                    className="flex-grow bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                                 <button
-                                    type="button"
                                     onClick={handleFetchVerse}
-                                    disabled={isLoading}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                                    disabled={isLoading || !verseReference.trim() || !apiKey}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-500 disabled:cursor-not-allowed"
                                 >
-                                    {isLoading && !feedbackText ? (
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    ) : (
-                                        <SparklesIcon className="w-5 h-5"/>
-                                    )}
-                                    <span className="font-bold">가져오기</span>
+                                    <SparklesIcon className="w-5 h-5" />
+                                    <span>구절 찾기</span>
                                 </button>
                             </div>
-                            {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+                            {!apiKey && <p className="mt-2 text-xs text-yellow-400">AI 기능을 사용하려면 설정에서 API 키를 입력해주세요.</p>}
+
+                            {isLoading && <div className="text-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto"></div><p className="mt-2 text-slate-400">AI가 구절을 찾고 있습니다...</p></div>}
+                            {error && <p className="mt-4 text-center text-red-400 bg-red-500/10 p-3 rounded-md">{error}</p>}
+                            
+                            {fetchedVerses.length > 0 && (
+                                <div className="mt-6 space-y-4">
+                                    <h3 className="text-lg font-semibold text-slate-200">검색 결과 ({fetchedVerses.length}개)</h3>
+                                    <div className="max-h-60 overflow-y-auto space-y-3 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                                        {fetchedVerses.map(v => (
+                                            <div key={`${v.bookName}-${v.chapter}-${v.verse}`} className="p-3 bg-slate-800 rounded">
+                                                <p className="font-bold text-indigo-300">{v.koreanBookName} {v.chapter}:{v.verse}</p>
+                                                <p className="mt-1 text-slate-300 whitespace-pre-wrap">{v.text}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-4">
+                                        <label htmlFor="feedback" className="text-sm font-medium text-slate-400">결과가 '새번역' 성경이 아닌가요? 피드백을 남겨주세요.</label>
+                                        <div className="flex gap-2 mt-1">
+                                             <input
+                                                type="text"
+                                                id="feedback"
+                                                value={feedbackText}
+                                                onChange={(e) => setFeedbackText(e.target.value)}
+                                                placeholder="예: '개역개정' 같아요. '새번역'으로 찾아주세요."
+                                                className="flex-grow bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100 focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                            <button onClick={handleFeedbackSubmit} disabled={!feedbackText.trim() || isLoading} className="px-4 py-2 bg-slate-600 text-slate-200 rounded-md hover:bg-slate-500 disabled:bg-slate-700 disabled:cursor-not-allowed">
+                                                전송
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                     
+                    {/* Manual Mode */}
                     {addMode === 'manual' && (
-                         <div className="mt-6 space-y-4">
-                            <div>
+                        <div className="space-y-4">
+                             <div>
                                 <label htmlFor="manual-book" className="block text-sm font-medium text-slate-300 mb-1">성경</label>
-                                <select 
-                                    id="manual-book" 
-                                    value={manualBook.name} 
-                                    onChange={(e) => setManualBook(BIBLE_BOOKS.find(b => b.name === e.target.value) || BIBLE_BOOKS[0])} 
-                                    className="focus:ring-blue-500 focus:border-blue-500 block w-full p-3 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100"
-                                >
-                                    {BIBLE_BOOKS.map(book => <option key={book.name} value={book.name}>{book.koreanName}</option>)}
+                                <select id="manual-book" value={manualBook.name} onChange={(e) => setManualBook(BIBLE_BOOKS.find(b => b.name === e.target.value) || BIBLE_BOOKS[0])} className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100 focus:ring-2 focus:ring-indigo-500">
+                                    {BIBLE_BOOKS.map(b => <option key={b.name} value={b.name}>{b.koreanName}</option>)}
                                 </select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="manual-chapter" className="block text-sm font-medium text-slate-300 mb-1">장</label>
-                                    <input type="number" id="manual-chapter" value={manualChapter} onChange={e => setManualChapter(e.target.value)} placeholder="11" className="focus:ring-blue-500 focus:border-blue-500 block w-full text-lg p-3 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400"/>
+                                    <input type="number" id="manual-chapter" value={manualChapter} onChange={e => setManualChapter(e.target.value)} className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100"/>
                                 </div>
                                 <div>
                                     <label htmlFor="manual-verse" className="block text-sm font-medium text-slate-300 mb-1">절</label>
-                                    <input type="number" id="manual-verse" value={manualVerse} onChange={e => setManualVerse(e.target.value)} placeholder="1" className="focus:ring-blue-500 focus:border-blue-500 block w-full text-lg p-3 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400"/>
+                                    <input type="number" id="manual-verse" value={manualVerse} onChange={e => setManualVerse(e.target.value)} className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100"/>
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="manual-text" className="block text-sm font-medium text-slate-300 mb-1">구절 내용</label>
-                                <textarea 
-                                    id="manual-text" 
-                                    rows={4} 
-                                    value={manualText}
-                                    onChange={e => setManualText(e.target.value)}
-                                    className="focus:ring-blue-500 focus:border-blue-500 block w-full p-3 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400" 
-                                    placeholder="믿음은 바라는 것들의 실상이요..."
-                                ></textarea>
-                                <p className="mt-2 text-xs text-slate-400">
-                                    의미 단위에 따라 줄바꿈(Enter)을 사용하여 가독성을 높일 수 있습니다.
-                                </p>
-                            </div>
-                         </div>
-                    )}
-
-                    {addMode === 'creed' && (
-                        <div className="mt-6 space-y-4">
-                            <p className="text-sm text-slate-400">암송을 위해 주기도문과 사도신경을 추가할 수 있습니다.</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <button 
-                                    type="button" 
-                                    onClick={() => handleCreedSelect(LORDS_PRAYER)}
-                                    disabled={selectedCreeds.some(c => c.bookName === 'LordsPrayer')}
-                                    className="p-4 bg-slate-700 rounded-lg text-left hover:bg-slate-600 disabled:bg-slate-700/50 disabled:cursor-not-allowed transition"
-                                >
-                                    <h4 className="font-bold text-slate-100">주기도문</h4>
-                                    <p className="text-xs text-slate-400 mt-1">새번역 기준</p>
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={() => handleCreedSelect(APOSTLES_CREED)}
-                                    disabled={selectedCreeds.some(c => c.bookName === 'ApostlesCreed')}
-                                    className="p-4 bg-slate-700 rounded-lg text-left hover:bg-slate-600 disabled:bg-slate-700/50 disabled:cursor-not-allowed transition"
-                                >
-                                    <h4 className="font-bold text-slate-100">사도신경</h4>
-                                    <p className="text-xs text-slate-400 mt-1">전통적 신앙 고백</p>
-                                </button>
+                                <label htmlFor="manual-text" className="block text-sm font-medium text-slate-300 mb-1">내용</label>
+                                <textarea id="manual-text" rows={5} value={manualText} onChange={e => setManualText(e.target.value)} className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100"></textarea>
                             </div>
                         </div>
                     )}
                     
-                    {addMode === 'ai' && fetchedVerses.length > 0 && (
-                         <div className="mt-6">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-bold text-slate-200">
-                                    가져온 구절 ({fetchedVerses.length}개)
-                                </h3>
-                                <button onClick={handleAiTabReset} className="text-sm text-slate-400 hover:text-slate-200 font-medium">
-                                    초기화
-                                </button>
-                            </div>
-                            <div className="max-h-60 overflow-y-auto border border-slate-700 rounded-md bg-slate-900 p-2 space-y-1">
-                                {fetchedVerses.map((verse, index) => (
-                                    <div key={index} className="p-3 border-l-4 border-blue-500 bg-slate-800 rounded-r-md">
-                                        <p className="font-semibold text-sm text-slate-100">
-                                            {verse.koreanBookName} {verse.chapter}:{verse.verse}
-                                        </p>
-                                        <p className="mt-1 text-slate-300 whitespace-pre-wrap">
-                                            {verse.text}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                             <div className="mt-4 pt-4 border-t border-slate-700">
-                                <h4 className="text-sm font-semibold text-slate-300">결과가 정확하지 않나요?</h4>
-                                <p className="text-xs text-slate-400 mb-2">AI에게 피드백을 보내 더 정확한 구절을 찾아달라고 요청할 수 있습니다. (예: "새번역이 아니에요")</p>
-                                <div className="grid grid-cols-[1fr_auto] gap-2">
-                                    <input
-                                        type="text"
-                                        value={feedbackText}
-                                        onChange={(e) => setFeedbackText(e.target.value)}
-                                        className="focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 bg-slate-700 border-slate-600 rounded-md shadow-sm text-slate-100 placeholder-slate-400"
-                                        placeholder="피드백 입력..."
-                                        disabled={isLoading}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleFeedbackSubmit()}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleFeedbackSubmit}
-                                        disabled={isLoading || !feedbackText.trim()}
-                                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoading && feedbackText ? (
-                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                        ) : (
-                                        '수정 요청'
-                                        )}
-                                    </button>
+                    {/* Creed Mode */}
+                    {addMode === 'creed' && (
+                        <div className="space-y-4">
+                            {[LORDS_PRAYER, APOSTLES_CREED].map(creed => (
+                                <div
+                                    key={creed.bookName}
+                                    onClick={() => handleCreedToggle(creed)}
+                                    className={`p-4 rounded-lg cursor-pointer border-2 transition-colors ${selectedCreeds.some(c => c.bookName === creed.bookName) ? 'bg-indigo-500/20 border-indigo-500' : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'}`}
+                                >
+                                    <h3 className="font-bold text-lg text-slate-100">{creed.koreanBookName}</h3>
+                                    <p className="mt-2 text-sm text-slate-300 whitespace-pre-wrap">{creed.text}</p>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     )}
-
-                    {addMode === 'creed' && selectedCreeds.length > 0 && (
-                        <div className="mt-6">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-bold text-slate-200">
-                                    선택된 항목 ({selectedCreeds.length}개)
-                                </h3>
-                                <button onClick={() => setSelectedCreeds([])} className="text-sm text-slate-400 hover:text-slate-200 font-medium">
-                                    초기화
-                                </button>
+                    
+                    {/* Study Mode */}
+                    {addMode === 'study' && (
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="study-title" className="block text-sm font-medium text-slate-300 mb-1">
+                                    제목
+                                </label>
+                                <input
+                                    type="text"
+                                    id="study-title"
+                                    value={studyTitle}
+                                    onChange={(e) => setStudyTitle(e.target.value)}
+                                    className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                    placeholder="예: 제자훈련 1과"
+                                />
                             </div>
-                            <div className="max-h-60 overflow-y-auto border border-slate-700 rounded-md bg-slate-900 p-2 space-y-1">
-                                {selectedCreeds.map((verse, index) => (
-                                    <div key={index} className="p-3 border-l-4 border-purple-500 bg-slate-800 rounded-r-md">
-                                        <p className="font-semibold text-sm text-slate-100">
-                                            {verse.koreanBookName}
-                                        </p>
-                                        <p className="mt-1 text-slate-300 whitespace-pre-wrap">
-                                            {verse.text}
-                                        </p>
-                                    </div>
-                                ))}
+                            <div>
+                                <label htmlFor="study-content" className="block text-sm font-medium text-slate-300 mb-1">
+                                    내용
+                                </label>
+                                <textarea
+                                    id="study-content"
+                                    value={studyContent}
+                                    onChange={(e) => setStudyContent(e.target.value)}
+                                    rows={8}
+                                    className="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                    placeholder="암송할 내용을 입력하세요."
+                                ></textarea>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="bg-slate-900 px-6 py-4 mt-auto flex-shrink-0">
+                <div className="bg-slate-900 px-6 py-4 flex-shrink-0">
                     <button
                         type="button"
                         onClick={handleSave}
-                        disabled={isSaveDisabled}
-                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-3 bg-green-600 text-base font-bold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-green-500 disabled:bg-slate-600 disabled:cursor-not-allowed"
+                        disabled={isSaveDisabled()}
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500 disabled:bg-slate-500 disabled:cursor-not-allowed sm:text-sm"
                     >
-                        {getSaveButtonText()}
+                        {isLoading ? '로딩 중...' : '암송 목록에 추가'}
                     </button>
                 </div>
             </div>
